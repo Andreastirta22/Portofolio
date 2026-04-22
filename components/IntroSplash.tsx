@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, Variants } from "framer-motion";
 import Image from "next/image";
-
-const MotionImage = motion(Image);
 
 const SPLASH_IMAGES = [
   "/splash/splash-blue.png",
@@ -15,7 +13,8 @@ const SPLASH_IMAGES = [
 
 const HOLD_DURATION = 700;
 
-const imageVariants = {
+// ✅ kasih type Variants biar TS diem
+const imageVariants: Variants = {
   enter: {
     opacity: 0,
     scale: 0.92,
@@ -52,9 +51,9 @@ export default function IntroSplash({ onFinish }: IntroSplashProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
-  const hasFinishedRef = useRef(false); // 🔥 guard biar ga double call
+  const hasFinishedRef = useRef(false);
 
-  // preload images
+  // ✅ preload aman (ga bentrok lagi)
   useEffect(() => {
     SPLASH_IMAGES.forEach((src) => {
       const img = new window.Image();
@@ -90,7 +89,8 @@ export default function IntroSplash({ onFinish }: IntroSplashProps) {
         <motion.div
           key="overlay"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.8 } }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black overflow-hidden pointer-events-none"
         >
           {/* Ambient glow */}
@@ -123,26 +123,30 @@ export default function IntroSplash({ onFinish }: IntroSplashProps) {
 
           {/* image sequence */}
           <AnimatePresence mode="wait">
-            <MotionImage
+            <motion.div
               key={currentIndex}
-              src={SPLASH_IMAGES[currentIndex]}
-              alt="splash"
               variants={imageVariants}
               initial="enter"
               animate="visible"
               exit="exit"
-              width={680}
-              height={680}
-              className="absolute select-none"
-              style={{
-                width: "min(680px, 86vw)",
-                height: "auto",
-                objectFit: "contain",
-                willChange: "transform, opacity, filter",
-                pointerEvents: "none",
-              }}
-              draggable={false}
-            />
+              className="absolute"
+            >
+              <Image
+                src={SPLASH_IMAGES[currentIndex]}
+                alt="splash"
+                width={680}
+                height={680}
+                priority
+                className="select-none"
+                style={{
+                  width: "min(680px, 86vw)",
+                  height: "auto",
+                  objectFit: "contain",
+                  pointerEvents: "none",
+                }}
+                draggable={false}
+              />
+            </motion.div>
           </AnimatePresence>
 
           {/* vignette */}
