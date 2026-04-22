@@ -39,7 +39,7 @@ const imageVariants = {
     filter: "blur(6px)",
     transition: {
       duration: 0.45,
-      ease: [0.4, 0, 1, 1],
+      ease: "easeOut",
     },
   },
 };
