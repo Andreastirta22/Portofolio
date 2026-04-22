@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
+
+const MotionImage = motion(Image);
 
 const SPLASH_IMAGES = [
   "/splash/splash-blue.png",
@@ -54,7 +57,7 @@ export default function IntroSplash({ onFinish }: IntroSplashProps) {
   // preload images
   useEffect(() => {
     SPLASH_IMAGES.forEach((src) => {
-      const img = new Image();
+      const img = new window.Image();
       img.src = src;
     });
   }, []);
@@ -120,13 +123,16 @@ export default function IntroSplash({ onFinish }: IntroSplashProps) {
 
           {/* image sequence */}
           <AnimatePresence mode="wait">
-            <motion.img
+            <MotionImage
               key={currentIndex}
               src={SPLASH_IMAGES[currentIndex]}
+              alt="splash"
               variants={imageVariants}
               initial="enter"
               animate="visible"
               exit="exit"
+              width={680}
+              height={680}
               className="absolute select-none"
               style={{
                 width: "min(680px, 86vw)",
