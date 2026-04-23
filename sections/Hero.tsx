@@ -115,7 +115,17 @@ function Particles({ accent }: { accent: string }) {
     </div>
   );
 }
+
 export default function Hero({ onExplore }: { onExplore: () => void }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   const [current, setCurrent] = useState(0);
   const [showCVModal, setShowCVModal] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -243,16 +253,20 @@ export default function Hero({ onExplore }: { onExplore: () => void }) {
       {/* ── MAIN SECTION ── */}
       <motion.section
         ref={containerRef}
-        onWheel={handleWheel}
-        onMouseMove={handleMouseMove}
-        drag="y"
+        onWheel={!isMobile ? handleWheel : undefined}
+        onMouseMove={!isMobile ? handleMouseMove : undefined}
+        drag={!isMobile ? "y" : false}
         dragConstraints={{ top: 0, bottom: 0 }}
-        onDragStart={() => setPaused(true)}
-        onDragEnd={(_, info) => {
-          if (info.offset.y < -60) next();
-          if (info.offset.y > 60) prev();
-          setTimeout(() => setPaused(false), 3000);
-        }}
+        onDragStart={!isMobile ? () => setPaused(true) : undefined}
+        onDragEnd={
+          !isMobile
+            ? (_, info) => {
+                if (info.offset.y < -60) next();
+                if (info.offset.y > 60) prev();
+                setTimeout(() => setPaused(false), 3000);
+              }
+            : undefined
+        }
         className="relative w-full h-full overflow-hidden rounded-[36px] border border-white/10 backdrop-blur-xl"
         style={{
           background: "linear-gradient(180deg, #0a0a0a, #050505)",
@@ -268,7 +282,7 @@ export default function Hero({ onExplore }: { onExplore: () => void }) {
           <motion.div
             key={active.image + "-bg"}
             className="absolute inset-[-4%] z-0"
-            style={{ x: bgX, y: bgY }}
+            style={!isMobile ? { x: bgX, y: bgY } : undefined}
             initial={{ opacity: 0, scale: 1.08 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.97 }}

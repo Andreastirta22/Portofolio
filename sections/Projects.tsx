@@ -68,8 +68,6 @@ function MagneticCard({ children, className, style, onClick }: any) {
     damping: 20,
   });
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-
   function onMouseMove(e: React.MouseEvent) {
     const rect = ref.current?.getBoundingClientRect();
     if (!rect) return;
@@ -85,15 +83,15 @@ function MagneticCard({ children, className, style, onClick }: any) {
     <motion.div
       ref={ref}
       onClick={onClick}
-      onMouseMove={!isMobile ? onMouseMove : undefined}
-      onMouseLeave={!isMobile ? onMouseLeave : undefined}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
       className={className}
       style={{
         ...style,
-        transformStyle: isMobile ? "flat" : "preserve-3d",
-        perspective: isMobile ? 0 : 800,
-        rotateX: isMobile ? 0 : rotateX,
-        rotateY: isMobile ? 0 : rotateY,
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
+        perspective: 800,
       }}
     >
       {children}

@@ -4,11 +4,11 @@ import { motion, useInView } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 
 const images = [
-  "/andre/a.png",
-  "/andre/n.png",
-  "/andre/d.png",
-  "/andre/r.png",
-  "/andre/e.png",
+  "https://ik.imagekit.io/0bdqq0ixx/A.png",
+  "https://ik.imagekit.io/0bdqq0ixx/N.png",
+  "https://ik.imagekit.io/0bdqq0ixx/D.png",
+  "https://ik.imagekit.io/0bdqq0ixx/R.png",
+  "https://ik.imagekit.io/0bdqq0ixx/E.png",
 ];
 
 export default function FallingAndre() {

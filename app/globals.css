@@ -47,3 +47,12 @@ body {
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+
+* {
+  -webkit-user-drag: none;
+}
+
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+}

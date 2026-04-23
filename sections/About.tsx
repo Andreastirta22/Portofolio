@@ -11,23 +11,30 @@ import { useEffect, useRef, useState } from "react";
 import FlipCard from "@/components/FlipCard";
 import { supabase } from "@/lib/supabase";
 
+/* ─────────────────────────────────────────────
+   PALETTE — refined monochromatic with fine
+   single-hue accent shifts per card
+───────────────────────────────────────────── */
 const PALETTE = [
-  { accent: "#C9A96E", glow: "rgba(201,169,110,0.15)" },
-  { accent: "#7EB8D4", glow: "rgba(126,184,212,0.15)" },
-  { accent: "#B87EC9", glow: "rgba(184,126,201,0.15)" },
-  { accent: "#7EC9A9", glow: "rgba(126,201,169,0.15)" },
+  { accent: "#E8E4DC", dim: "rgba(232,228,220,0.12)", bar: "#E8E4DC" },
+  { accent: "#C4C0B8", dim: "rgba(196,192,184,0.10)", bar: "#C4C0B8" },
+  { accent: "#A09C94", dim: "rgba(160,156,148,0.10)", bar: "#A09C94" },
+  { accent: "#787470", dim: "rgba(120,116,112,0.10)", bar: "#787470" },
 ];
 
+/* ─────────────────────────────────────────────
+   STAGGER CHARS — 3-D letterfall
+───────────────────────────────────────────── */
 const STAGGER_CHARS = (text: string, delay = 0) =>
   text.split("").map((char, i) => (
     <motion.span
       key={i}
-      initial={{ opacity: 0, y: 40, rotateX: -90 }}
-      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      initial={{ opacity: 0, y: 48, rotateX: -90, filter: "blur(4px)" }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)" }}
       viewport={{ once: true }}
       transition={{
-        delay: delay + i * 0.025,
-        duration: 0.5,
+        delay: delay + i * 0.028,
+        duration: 0.55,
         ease: [0.22, 1, 0.36, 1],
       }}
       style={{ display: "inline-block", transformOrigin: "bottom" }}
@@ -36,22 +43,86 @@ const STAGGER_CHARS = (text: string, delay = 0) =>
     </motion.span>
   ));
 
+/* ─────────────────────────────────────────────
+   SCANLINE — subtle CRT atmosphere
+───────────────────────────────────────────── */
+const Scanlines = () => (
+  <div
+    aria-hidden
+    style={{
+      position: "absolute",
+      inset: 0,
+      backgroundImage:
+        "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px)",
+      pointerEvents: "none",
+      zIndex: 0,
+    }}
+  />
+);
+
+/* ─────────────────────────────────────────────
+   ANIMATED COUNTER
+───────────────────────────────────────────── */
+const Counter = ({ value, color }: { value: number; color: string }) => {
+  const [display, setDisplay] = useState(0);
+  const ref = useRef(false);
+  useEffect(() => {
+    if (ref.current) return;
+    ref.current = true;
+    let start = 0;
+    const step = () => {
+      start += 2;
+      if (start >= value) {
+        setDisplay(value);
+        return;
+      }
+      setDisplay(start);
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [value]);
+  return (
+    <motion.span
+      style={{
+        fontFamily: "'Playfair Display', Georgia, serif",
+        fontStyle: "italic",
+        fontSize: "clamp(1.6rem, 4vw, 2rem)",
+        lineHeight: 1,
+        display: "block",
+        color,
+      }}
+    >
+      {display}
+    </motion.span>
+  );
+};
+
+/* ─────────────────────────────────────────────
+   MAIN COMPONENT
+───────────────────────────────────────────── */
 export default function About() {
   const sectionRef = useRef<HTMLElement>(null);
   const [skillGroups, setSkillGroups] = useState<any[]>([]);
   const [activeCard, setActiveCard] = useState<number | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   });
 
-  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
-  const lineScale = useTransform(scrollYProgress, [0.1, 0.5], [0, 1]);
-  const smoothLine = useSpring(lineScale, { stiffness: 80, damping: 20 });
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const noiseOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    [0.3, 0.5, 0.3],
+  );
+  const lineScale = useTransform(scrollYProgress, [0.05, 0.4], [0, 1]);
+  const smoothLine = useSpring(lineScale, { stiffness: 90, damping: 24 });
 
   useEffect(() => {
+    setMounted(true);
     const fetchData = async () => {
       const { data } = await supabase
         .from("skill_groups")
@@ -65,610 +136,794 @@ export default function About() {
   const getAverage = (skills: any[]) =>
     Math.round(skills.reduce((acc, s) => acc + s.value, 0) / skills.length);
 
+  /* ── RESPONSIVE breakpoint via CSS var injection ── */
+  const css = `
+    :root { --about-cols: 1fr; --about-pad: 1.25rem; --about-gap: 2.5rem; }
+    @media (min-width: 768px) {
+      :root { --about-cols: 1fr 1.1fr; --about-pad: 2rem; --about-gap: 3rem; }
+    }
+    @media (min-width: 1100px) {
+      :root { --about-pad: 2.5rem; }
+    }
+    .about-grid { display: grid; grid-template-columns: var(--about-cols); gap: var(--about-gap); align-items: start; }
+    .about-wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--about-pad); }
+    .about-header { margin-bottom: clamp(3rem, 6vw, 6rem); }
+    @media (max-width: 767px) {
+      .about-flipwrap { max-width: 320px; margin: 0 auto 2.5rem; }
+      .about-biotext { font-size: 1rem !important; }
+      .about-cta { flex-direction: column !important; }
+      .about-cta button { width: 100%; }
+    }
+  `;
+
   return (
-    <section
-      id="about"
-      ref={sectionRef}
-      style={{
-        background: "#0C0C0E",
-        color: "#E8E4DC",
-        position: "relative",
-        overflow: "hidden",
-        padding: "10rem 0",
-        scrollMarginTop: "6rem",
-      }}
-    >
-      {/* ── BACKGROUND TEXTURE ── */}
-      <motion.div
+    <>
+      <style>{css}</style>
+      <section
+        id="about"
+        ref={sectionRef}
         style={{
-          position: "absolute",
-          inset: 0,
-          y: bgY,
-          backgroundImage: `
-            radial-gradient(ellipse 80% 60% at 20% 30%, rgba(201,169,110,0.04) 0%, transparent 70%),
-            radial-gradient(ellipse 60% 80% at 80% 70%, rgba(126,184,212,0.04) 0%, transparent 70%)
-          `,
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* ── NOISE GRAIN ── */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E")`,
-          pointerEvents: "none",
-          opacity: 0.4,
-        }}
-      />
-
-      {/* ── LARGE BG NUMBER ── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1.5 }}
-        style={{
-          position: "absolute",
-          top: "-0.1em",
-          right: "-0.05em",
-          fontSize: "clamp(200px, 30vw, 420px)",
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontStyle: "italic",
-          fontWeight: 700,
-          color: "transparent",
-          WebkitTextStroke: "1px rgba(232,228,220,0.04)",
-          lineHeight: 1,
-          userSelect: "none",
-          pointerEvents: "none",
-          letterSpacing: "-0.04em",
+          background: "#080808",
+          color: "#E8E4DC",
+          position: "relative",
+          overflow: "hidden",
+          padding: "clamp(6rem, 12vw, 11rem) 0",
+          scrollMarginTop: "5rem",
         }}
       >
-        02
-      </motion.div>
-
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 2rem" }}>
-        {/* ── HEADER ── */}
-        <div style={{ marginBottom: "6rem" }}>
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "1rem",
-              marginBottom: "2rem",
-            }}
-          >
-            <motion.div
-              style={{
-                height: "1px",
-                background: "#C9A96E",
-                scaleX: smoothLine,
-                transformOrigin: "left",
-                width: "60px",
-              }}
-            />
-            <span
-              style={{
-                fontSize: "11px",
-                letterSpacing: "0.25em",
-                textTransform: "uppercase",
-                color: "#C9A96E",
-                fontFamily: "'DM Mono', monospace",
-              }}
-            >
-              About Me
-            </span>
-          </motion.div>
-
-          <h2
-            style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: "clamp(3rem, 6vw, 6rem)",
-              fontWeight: 700,
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
-              margin: 0,
-              perspective: "800px",
-            }}
-          >
-            <div style={{ display: "block", overflow: "visible" }}>
-              {STAGGER_CHARS("Crafting", 0)}
-            </div>
-            <div
-              style={{
-                display: "block",
-                overflow: "visible",
-                fontStyle: "italic",
-                fontWeight: 400,
-                color: "rgba(232,228,220,0.35)",
-              }}
-            >
-              {STAGGER_CHARS("digital", 0.2)}
-            </div>
-            <div style={{ display: "block", overflow: "visible" }}>
-              {STAGGER_CHARS("experiences.", 0.4)}
-            </div>
-          </h2>
-        </div>
-
-        {/* ── MAIN GRID ── */}
+        {/* ── DEEP VIGNETTE ── */}
         <div
+          aria-hidden
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: "3rem",
-            alignItems: "start",
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(ellipse 100% 100% at 50% 0%, transparent 50%, #000 100%)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+
+        {/* ── SUBTLE RADIAL GLOW (static) ── */}
+        <motion.div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            y: bgY,
+            backgroundImage: `
+              radial-gradient(ellipse 60% 50% at 15% 25%, rgba(232,228,220,0.025) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 60% at 85% 75%, rgba(232,228,220,0.018) 0%, transparent 70%)
+            `,
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+
+        {/* ── GRAIN OVERLAY ── */}
+        <motion.div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: noiseOpacity,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E")`,
+            backgroundSize: "256px",
+            pointerEvents: "none",
+            zIndex: 1,
+          }}
+        />
+
+        <Scanlines />
+
+        {/* ── BIG GHOST NUMBER ── */}
+        <motion.div
+          aria-hidden
+          initial={{ opacity: 0, x: 40 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            position: "absolute",
+            top: "-0.08em",
+            right: "-0.04em",
+            fontSize: "clamp(160px, 28vw, 400px)",
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontStyle: "italic",
+            fontWeight: 700,
+            color: "transparent",
+            WebkitTextStroke: "1px rgba(232,228,220,0.035)",
+            lineHeight: 1,
+            userSelect: "none",
+            pointerEvents: "none",
+            letterSpacing: "-0.04em",
+            zIndex: 1,
           }}
         >
-          {/* ── LEFT ── */}
-          <div>
-            {/* FlipCard with frame */}
-            <motion.div
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-              style={{ position: "relative", marginBottom: "3rem" }}
-            >
-              {/* Corner decorations */}
-              {[
-                { top: -12, left: -12 },
-                { top: -12, right: -12 },
-                { bottom: -12, left: -12 },
-                { bottom: -12, right: -12 },
-              ].map((pos, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.6 + i * 0.08, duration: 0.4 }}
-                  style={{
-                    position: "absolute",
-                    width: 20,
-                    height: 20,
-                    borderTop: i < 2 ? "1px solid #C9A96E" : undefined,
-                    borderBottom: i >= 2 ? "1px solid #C9A96E" : undefined,
-                    borderLeft: i % 2 === 0 ? "1px solid #C9A96E" : undefined,
-                    borderRight: i % 2 === 1 ? "1px solid #C9A96E" : undefined,
-                    ...pos,
-                  }}
-                />
-              ))}
-              <FlipCard />
-            </motion.div>
+          02
+        </motion.div>
 
-            {/* Bio text */}
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+        {/* ── HORIZONTAL RULE TOP ── */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "1px",
+            background:
+              "linear-gradient(90deg, transparent 0%, rgba(232,228,220,0.15) 30%, rgba(232,228,220,0.15) 70%, transparent 100%)",
+            transformOrigin: "center",
+            zIndex: 2,
+          }}
+        />
+
+        {/* ════════════════════════════════════════
+            MAIN CONTENT
+        ════════════════════════════════════════ */}
+        <div className="about-wrap" style={{ position: "relative", zIndex: 3 }}>
+          {/* ── HEADER ── */}
+          <div className="about-header">
+            <motion.div
+              initial={{ opacity: 0, x: -24 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.7 }}
+              transition={{ duration: 0.7 }}
               style={{
-                fontFamily: "'DM Serif Display', Georgia, serif",
-                fontSize: "1.125rem",
-                lineHeight: 1.9,
-                color: "rgba(232,228,220,0.55)",
-                maxWidth: "400px",
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                marginBottom: "2rem",
               }}
             >
-              Frontend developer focused on clean UI and modern web
-              technologies. Building with React, Next.js, and a passion for
-              great design.
-            </motion.p>
-
-            {/* CTA */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              style={{ display: "flex", gap: "1rem", marginTop: "2.5rem" }}
-            >
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
+              <motion.div
                 style={{
-                  padding: "0.85rem 2rem",
-                  background: "#C9A96E",
-                  color: "#0C0C0E",
-                  border: "none",
-                  borderRadius: 2,
-                  fontSize: "0.8rem",
-                  letterSpacing: "0.12em",
+                  height: "1px",
+                  background: "rgba(232,228,220,0.5)",
+                  scaleX: smoothLine,
+                  transformOrigin: "left",
+                  width: "48px",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "10px",
+                  letterSpacing: "0.3em",
                   textTransform: "uppercase",
-                  fontWeight: 600,
+                  color: "rgba(232,228,220,0.45)",
                   fontFamily: "'DM Mono', monospace",
-                  cursor: "pointer",
                 }}
               >
-                View Work
-              </motion.button>
-              <motion.button
-                whileHover={{
-                  scale: 1.04,
-                  borderColor: "#C9A96E",
-                  color: "#C9A96E",
-                }}
-                whileTap={{ scale: 0.97 }}
-                style={{
-                  padding: "0.85rem 2rem",
-                  background: "transparent",
-                  color: "rgba(232,228,220,0.6)",
-                  border: "1px solid rgba(232,228,220,0.2)",
-                  borderRadius: 2,
-                  fontSize: "0.8rem",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  fontFamily: "'DM Mono', monospace",
-                  cursor: "pointer",
-                  transition: "color 0.3s, border-color 0.3s",
-                }}
-              >
-                Contact
-              </motion.button>
+                About Me
+              </span>
             </motion.div>
-          </div>
 
-          {/* ── RIGHT: SKILL CARDS ── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-            {/* Section label */}
+            <h2
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: "clamp(2.8rem, 7vw, 6.5rem)",
+                fontWeight: 700,
+                lineHeight: 1.05,
+                letterSpacing: "-0.025em",
+                margin: 0,
+                perspective: "900px",
+              }}
+            >
+              <div style={{ display: "block", overflow: "visible" }}>
+                {STAGGER_CHARS("Building", 0)}
+              </div>
+
+              <div
+                style={{
+                  display: "block",
+                  overflow: "visible",
+                  fontStyle: "italic",
+                  fontWeight: 400,
+                  color: "rgba(232,228,220,0.22)",
+                }}
+              >
+                {STAGGER_CHARS("effortless", 0.2)}
+              </div>
+
+              <div style={{ display: "block", overflow: "visible" }}>
+                {STAGGER_CHARS("interfaces.", 0.38)}
+              </div>
+            </h2>
+            {/* ── TICKER STRIP ── */}
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
               style={{
+                marginTop: "clamp(2rem, 4vw, 3rem)",
+                paddingTop: "1.5rem",
+                borderTop: "1px solid rgba(232,228,220,0.07)",
                 display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "0 0 1.5rem",
+                gap: "clamp(1.5rem, 4vw, 3rem)",
+                flexWrap: "wrap",
               }}
             >
-              <span
-                style={{
-                  fontSize: "10px",
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  color: "rgba(232,228,220,0.3)",
-                  fontFamily: "'DM Mono', monospace",
-                }}
-              >
-                Skill Matrix
-              </span>
-              <span
-                style={{
-                  fontSize: "10px",
-                  letterSpacing: "0.1em",
-                  color: "rgba(232,228,220,0.2)",
-                  fontFamily: "'DM Mono', monospace",
-                }}
-              >
-                {skillGroups.length} groups
-              </span>
-            </motion.div>
-
-            {skillGroups.map((group, i) => {
-              const avg = getAverage(group.skills);
-              const isActive = activeCard === i;
-              const isHovered = hoveredCard === i;
-              const color = PALETTE[i % PALETTE.length];
-
-              return (
-                <motion.div
-                  key={group.id}
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    delay: i * 0.1,
-                    duration: 0.6,
-                    ease: [0.22, 1, 0.36, 1],
+              {[
+                { label: "Years active", val: 4 },
+                { label: "Projects shipped", val: 32 },
+                { label: "Clients worldwide", val: 18 },
+              ].map((stat, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.2rem",
                   }}
-                  onClick={() => setActiveCard(isActive ? null : i)}
-                  onHoverStart={() => setHoveredCard(i)}
-                  onHoverEnd={() => setHoveredCard(null)}
-                  style={{ position: "relative" }}
                 >
-                  {/* Glow on hover */}
-                  <AnimatePresence>
-                    {(isHovered || isActive) && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        style={{
-                          position: "absolute",
-                          inset: 0,
-                          background: color.glow,
-                          pointerEvents: "none",
-                          zIndex: 0,
-                        }}
-                      />
-                    )}
-                  </AnimatePresence>
-
-                  <div
+                  {mounted && (
+                    <Counter value={stat.val} color="rgba(232,228,220,0.75)" />
+                  )}
+                  <span
                     style={{
-                      position: "relative",
-                      zIndex: 1,
-                      padding: "1.5rem",
-                      borderTop: `1px solid ${isActive ? color.accent : "rgba(232,228,220,0.07)"}`,
-                      borderBottom: isActive
-                        ? `1px solid ${color.accent}`
-                        : "1px solid transparent",
-                      cursor: "pointer",
-                      transition: "border-color 0.3s",
+                      fontSize: "10px",
+                      letterSpacing: "0.15em",
+                      textTransform: "uppercase",
+                      color: "rgba(232,228,220,0.25)",
+                      fontFamily: "'DM Mono', monospace",
                     }}
                   >
-                    {/* Card Header */}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        marginBottom: "1rem",
-                      }}
-                    >
-                      <div>
-                        <p
-                          style={{
-                            margin: "0 0 0.25rem",
-                            fontSize: "0.95rem",
-                            fontWeight: 500,
-                            fontFamily: "'DM Serif Display', Georgia, serif",
-                            color: isActive ? color.accent : "#E8E4DC",
-                            transition: "color 0.3s",
-                            letterSpacing: "0.01em",
-                          }}
-                        >
-                          {group.title}
-                        </p>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontSize: "11px",
-                            color: "rgba(232,228,220,0.3)",
-                            fontFamily: "'DM Mono', monospace",
-                            letterSpacing: "0.08em",
-                          }}
-                        >
-                          {group.skills?.length} technologies
-                        </p>
-                      </div>
+                    {stat.label}
+                  </span>
+                </div>
+              ))}
+            </motion.div>
+          </div>
 
-                      <div style={{ textAlign: "right" }}>
-                        <motion.span
-                          animate={{
-                            color: isActive
-                              ? color.accent
-                              : "rgba(232,228,220,0.4)",
-                          }}
-                          style={{
-                            fontFamily: "'Playfair Display', Georgia, serif",
-                            fontStyle: "italic",
-                            fontSize: "2rem",
-                            lineHeight: 1,
-                            display: "block",
-                          }}
-                        >
-                          {avg}
-                        </motion.span>
-                        <span
-                          style={{
-                            fontSize: "10px",
-                            color: "rgba(232,228,220,0.25)",
-                            fontFamily: "'DM Mono', monospace",
-                          }}
-                        >
-                          avg %
-                        </span>
-                      </div>
-                    </div>
+          {/* ── MAIN GRID ── */}
+          <div className="about-grid">
+            {/* ═══════════ LEFT COLUMN ═══════════ */}
+            <div>
+              {/* FlipCard with refined frame */}
+              <motion.div
+                initial={{ opacity: 0, y: 50, filter: "blur(8px)" }}
+                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                className="about-flipwrap"
+                style={{ position: "relative", marginBottom: "2.5rem" }}
+              >
+                {/* Animated corner brackets */}
+                {[
+                  { top: -10, left: -10 },
+                  { top: -10, right: -10 },
+                  { bottom: -10, left: -10 },
+                  { bottom: -10, right: -10 },
+                ].map((pos, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.4 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{
+                      delay: 0.7 + i * 0.08,
+                      duration: 0.5,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    style={{
+                      position: "absolute",
+                      width: 18,
+                      height: 18,
+                      borderTop:
+                        i < 2 ? "1px solid rgba(232,228,220,0.4)" : undefined,
+                      borderBottom:
+                        i >= 2 ? "1px solid rgba(232,228,220,0.4)" : undefined,
+                      borderLeft:
+                        i % 2 === 0
+                          ? "1px solid rgba(232,228,220,0.4)"
+                          : undefined,
+                      borderRight:
+                        i % 2 === 1
+                          ? "1px solid rgba(232,228,220,0.4)"
+                          : undefined,
+                      ...pos,
+                    }}
+                  />
+                ))}
 
-                    {/* Progress bar */}
-                    <div
-                      style={{
-                        height: "1px",
-                        background: "rgba(232,228,220,0.08)",
-                        borderRadius: 1,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <motion.div
-                        initial={{ scaleX: 0 }}
-                        whileInView={{ scaleX: 1 }}
-                        viewport={{ once: true }}
-                        transition={{
-                          delay: 0.3 + i * 0.1,
-                          duration: 1,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                        style={{
-                          height: "100%",
-                          width: `${avg}%`,
-                          background: color.accent,
-                          transformOrigin: "left",
-                          borderRadius: 1,
-                        }}
-                      />
-                    </div>
+                {/* Subtle spotlight beneath card */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: -30,
+                    left: "10%",
+                    right: "10%",
+                    height: 60,
+                    background:
+                      "radial-gradient(ellipse at center, rgba(232,228,220,0.06) 0%, transparent 70%)",
+                    filter: "blur(10px)",
+                    pointerEvents: "none",
+                  }}
+                />
 
-                    {/* Expand: skill details */}
+                <FlipCard />
+              </motion.div>
+
+              {/* Bio */}
+              <motion.p
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.35, duration: 0.75 }}
+                className="about-biotext"
+                style={{
+                  fontFamily: "'DM Serif Display', Georgia, serif",
+                  fontSize: "1.1rem",
+                  lineHeight: 2,
+                  color: "rgba(232,228,220,0.4)",
+                  maxWidth: "420px",
+                  margin: 0,
+                }}
+              >
+                Frontend developer focused on clean UI and modern web
+                technologies. Building with React, Next.js, and a passion for
+                great design.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.55, duration: 0.65 }}
+                className="about-cta"
+                style={{ display: "flex", gap: "0.75rem", marginTop: "2rem" }}
+              >
+                <motion.button
+                  whileHover={{
+                    scale: 1.03,
+                    boxShadow: "0 0 24px rgba(232,228,220,0.12)",
+                  }}
+                  whileTap={{ scale: 0.96 }}
+                  style={{
+                    padding: "0.9rem 2.2rem",
+                    background: "rgba(232,228,220,0.92)",
+                    color: "#080808",
+                    border: "none",
+                    borderRadius: 1,
+                    fontSize: "0.72rem",
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    fontWeight: 700,
+                    fontFamily: "'DM Mono', monospace",
+                    cursor: "pointer",
+                    transition: "box-shadow 0.3s",
+                  }}
+                >
+                  View Work
+                </motion.button>
+
+                <motion.button
+                  whileHover={{
+                    scale: 1.03,
+                    borderColor: "rgba(232,228,220,0.5)",
+                    color: "rgba(232,228,220,0.85)",
+                  }}
+                  whileTap={{ scale: 0.96 }}
+                  style={{
+                    padding: "0.9rem 2.2rem",
+                    background: "transparent",
+                    color: "rgba(232,228,220,0.35)",
+                    border: "1px solid rgba(232,228,220,0.15)",
+                    borderRadius: 1,
+                    fontSize: "0.72rem",
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    fontFamily: "'DM Mono', monospace",
+                    cursor: "pointer",
+                    transition: "color 0.3s, border-color 0.3s",
+                  }}
+                >
+                  Contact
+                </motion.button>
+              </motion.div>
+            </div>
+
+            {/* ═══════════ RIGHT: SKILL MATRIX ═══════════ */}
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "1px" }}
+            >
+              {/* Header row */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "0 0 1.25rem",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "9px",
+                    letterSpacing: "0.25em",
+                    textTransform: "uppercase",
+                    color: "rgba(232,228,220,0.2)",
+                    fontFamily: "'DM Mono', monospace",
+                  }}
+                >
+                  Skill Matrix
+                </span>
+                <span
+                  style={{
+                    fontSize: "9px",
+                    letterSpacing: "0.1em",
+                    color: "rgba(232,228,220,0.15)",
+                    fontFamily: "'DM Mono', monospace",
+                  }}
+                >
+                  {skillGroups.length} groups
+                </span>
+              </motion.div>
+
+              {skillGroups.map((group, i) => {
+                const avg = getAverage(group.skills);
+                const isActive = activeCard === i;
+                const isHovered = hoveredCard === i;
+                const color = PALETTE[i % PALETTE.length];
+
+                return (
+                  <motion.div
+                    key={group.id}
+                    initial={{ opacity: 0, x: 40, filter: "blur(6px)" }}
+                    whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                    viewport={{ once: true }}
+                    transition={{
+                      delay: i * 0.09,
+                      duration: 0.65,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    onClick={() => setActiveCard(isActive ? null : i)}
+                    onHoverStart={() => setHoveredCard(i)}
+                    onHoverEnd={() => setHoveredCard(null)}
+                    style={{ position: "relative", cursor: "pointer" }}
+                  >
+                    {/* Hover / active bg fill */}
                     <AnimatePresence>
-                      {isActive && (
+                      {(isHovered || isActive) && (
                         <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{
-                            duration: 0.4,
-                            ease: [0.22, 1, 0.36, 1],
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            background: isActive
+                              ? `linear-gradient(90deg, rgba(232,228,220,0.04) 0%, transparent 100%)`
+                              : "rgba(232,228,220,0.02)",
+                            pointerEvents: "none",
+                            zIndex: 0,
                           }}
-                          style={{ overflow: "hidden" }}
-                        >
-                          <div
-                            style={{
-                              paddingTop: "1.5rem",
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "1rem",
-                            }}
-                          >
-                            {group.skills.map((skill: any, idx: number) => (
-                              <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: idx * 0.06 }}
-                              >
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    marginBottom: "0.4rem",
-                                  }}
-                                >
-                                  <span
-                                    style={{
-                                      fontSize: "12px",
-                                      color: "rgba(232,228,220,0.5)",
-                                      fontFamily: "'DM Mono', monospace",
-                                      letterSpacing: "0.06em",
-                                    }}
-                                  >
-                                    {skill.name}
-                                  </span>
-                                  <span
-                                    style={{
-                                      fontSize: "12px",
-                                      color: color.accent,
-                                      fontFamily: "'DM Mono', monospace",
-                                    }}
-                                  >
-                                    {skill.value}%
-                                  </span>
-                                </div>
-                                <div
-                                  style={{
-                                    height: "2px",
-                                    background: "rgba(232,228,220,0.06)",
-                                    borderRadius: 1,
-                                    overflow: "hidden",
-                                  }}
-                                >
-                                  <motion.div
-                                    initial={{ scaleX: 0 }}
-                                    animate={{ scaleX: 1 }}
-                                    transition={{
-                                      delay: 0.1 + idx * 0.05,
-                                      duration: 0.7,
-                                      ease: [0.22, 1, 0.36, 1],
-                                    }}
-                                    style={{
-                                      height: "100%",
-                                      width: `${skill.value}%`,
-                                      background: `linear-gradient(90deg, ${color.accent}99, ${color.accent})`,
-                                      transformOrigin: "left",
-                                    }}
-                                  />
-                                </div>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </motion.div>
+                        />
                       )}
                     </AnimatePresence>
 
-                    {/* Toggle indicator */}
-                    <motion.div
-                      animate={{ rotate: isActive ? 45 : 0 }}
-                      transition={{ duration: 0.3 }}
+                    {/* Left accent bar (active only) */}
+                    <AnimatePresence>
+                      {isActive && (
+                        <motion.div
+                          initial={{ scaleY: 0 }}
+                          animate={{ scaleY: 1 }}
+                          exit={{ scaleY: 0 }}
+                          transition={{
+                            duration: 0.35,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                          style={{
+                            position: "absolute",
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: "1px",
+                            background: color.accent,
+                            transformOrigin: "top",
+                            zIndex: 1,
+                          }}
+                        />
+                      )}
+                    </AnimatePresence>
+
+                    <div
                       style={{
-                        position: "absolute",
-                        top: "1.5rem",
-                        right: "1.5rem",
-                        width: 16,
-                        height: 16,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: isActive
-                          ? color.accent
-                          : "rgba(232,228,220,0.3)",
-                        fontSize: "18px",
-                        lineHeight: 1,
-                        transition: "color 0.3s",
+                        position: "relative",
+                        zIndex: 2,
+                        padding: "1.4rem 1.4rem 1.4rem 1.6rem",
+                        borderTop: "1px solid rgba(232,228,220,0.07)",
+                        borderBottom: isActive
+                          ? "1px solid rgba(232,228,220,0.1)"
+                          : "1px solid transparent",
+                        transition: "border-color 0.3s",
                       }}
                     >
-                      +
-                    </motion.div>
-                  </div>
-                </motion.div>
-              );
-            })}
+                      {/* Card Header */}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          marginBottom: "1.1rem",
+                          paddingRight: "1.5rem",
+                        }}
+                      >
+                        <div>
+                          <p
+                            style={{
+                              margin: "0 0 0.3rem",
+                              fontSize: "clamp(0.85rem, 2.5vw, 0.95rem)",
+                              fontWeight: 500,
+                              fontFamily: "'DM Serif Display', Georgia, serif",
+                              color: isActive
+                                ? color.accent
+                                : "rgba(232,228,220,0.75)",
+                              transition: "color 0.35s",
+                              letterSpacing: "0.01em",
+                            }}
+                          >
+                            {group.title}
+                          </p>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: "10px",
+                              color: "rgba(232,228,220,0.2)",
+                              fontFamily: "'DM Mono', monospace",
+                              letterSpacing: "0.1em",
+                            }}
+                          >
+                            {group.skills?.length} technologies
+                          </p>
+                        </div>
 
-            {/* Bottom rule */}
-            <motion.div
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                height: "1px",
-                background: "rgba(232,228,220,0.07)",
-                transformOrigin: "left",
-                marginTop: "1px",
-              }}
-            />
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          {mounted && (
+                            <Counter
+                              value={avg}
+                              color={
+                                isActive
+                                  ? color.accent
+                                  : "rgba(232,228,220,0.3)"
+                              }
+                            />
+                          )}
+                          <span
+                            style={{
+                              fontSize: "9px",
+                              color: "rgba(232,228,220,0.18)",
+                              fontFamily: "'DM Mono', monospace",
+                            }}
+                          >
+                            avg %
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div
+                        style={{
+                          height: "1px",
+                          background: "rgba(232,228,220,0.07)",
+                          borderRadius: 1,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <motion.div
+                          initial={{ scaleX: 0 }}
+                          whileInView={{ scaleX: 1 }}
+                          viewport={{ once: true }}
+                          transition={{
+                            delay: 0.25 + i * 0.08,
+                            duration: 1.1,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                          style={{
+                            height: "100%",
+                            width: `${avg}%`,
+                            background: `linear-gradient(90deg, transparent 0%, ${color.accent} 100%)`,
+                            transformOrigin: "left",
+                          }}
+                        />
+                      </div>
+
+                      {/* Expanded skill list */}
+                      <AnimatePresence>
+                        {isActive && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{
+                              duration: 0.45,
+                              ease: [0.22, 1, 0.36, 1],
+                            }}
+                            style={{ overflow: "hidden" }}
+                          >
+                            <div
+                              style={{
+                                paddingTop: "1.6rem",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "1rem",
+                              }}
+                            >
+                              {group.skills.map((skill: any, idx: number) => (
+                                <motion.div
+                                  key={idx}
+                                  initial={{ opacity: 0, x: -12 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{
+                                    delay: idx * 0.055,
+                                    duration: 0.4,
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      marginBottom: "0.45rem",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        fontSize: "11px",
+                                        color: "rgba(232,228,220,0.4)",
+                                        fontFamily: "'DM Mono', monospace",
+                                        letterSpacing: "0.08em",
+                                        textTransform: "uppercase",
+                                      }}
+                                    >
+                                      {skill.name}
+                                    </span>
+                                    <span
+                                      style={{
+                                        fontSize: "11px",
+                                        color: color.accent,
+                                        fontFamily: "'DM Mono', monospace",
+                                      }}
+                                    >
+                                      {skill.value}%
+                                    </span>
+                                  </div>
+                                  <div
+                                    style={{
+                                      height: "1px",
+                                      background: "rgba(232,228,220,0.05)",
+                                      overflow: "hidden",
+                                    }}
+                                  >
+                                    <motion.div
+                                      initial={{ scaleX: 0 }}
+                                      animate={{ scaleX: 1 }}
+                                      transition={{
+                                        delay: 0.08 + idx * 0.045,
+                                        duration: 0.8,
+                                        ease: [0.22, 1, 0.36, 1],
+                                      }}
+                                      style={{
+                                        height: "100%",
+                                        width: `${skill.value}%`,
+                                        background: `linear-gradient(90deg, rgba(232,228,220,0.2) 0%, ${color.accent} 100%)`,
+                                        transformOrigin: "left",
+                                      }}
+                                    />
+                                  </div>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Toggle + indicator */}
+                      <motion.div
+                        animate={{ rotate: isActive ? 45 : 0 }}
+                        transition={{
+                          duration: 0.35,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                        style={{
+                          position: "absolute",
+                          top: "1.4rem",
+                          right: "1.1rem",
+                          width: 16,
+                          height: 16,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: isActive
+                            ? color.accent
+                            : "rgba(232,228,220,0.2)",
+                          fontSize: "18px",
+                          lineHeight: 1,
+                          transition: "color 0.3s",
+                          fontWeight: 300,
+                        }}
+                      >
+                        +
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+
+              {/* Bottom rule */}
+              <motion.div
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  height: "1px",
+                  background: "rgba(232,228,220,0.06)",
+                  transformOrigin: "left",
+                  marginTop: "1px",
+                }}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* ── FOOTER STRIP ── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-          style={{
-            marginTop: "6rem",
-            paddingTop: "2rem",
-            borderTop: "1px solid rgba(232,228,220,0.07)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: "11px",
-              color: "rgba(232,228,220,0.2)",
-              letterSpacing: "0.1em",
-            }}
-          >
-            EST. 2021
-          </span>
+          {/* ── FOOTER STRIP ── */}
           <motion.div
-            animate={{ x: [0, 6, 0] }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.9 }}
             style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: "11px",
-              color: "#C9A96E",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
+              marginTop: "clamp(3.5rem, 7vw, 6rem)",
+              paddingTop: "1.75rem",
+              borderTop: "1px solid rgba(232,228,220,0.06)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "0.75rem",
             }}
           >
-            Scroll to explore →
+            <span
+              style={{
+                fontFamily: "'DM Mono', monospace",
+                fontSize: "10px",
+                color: "rgba(232,228,220,0.15)",
+                letterSpacing: "0.15em",
+              }}
+            >
+              EST. 2021
+            </span>
+
+            {/* Animated marquee hint */}
+            <motion.div
+              animate={{ x: [0, 7, 0] }}
+              transition={{
+                repeat: Infinity,
+                duration: 2.4,
+                ease: "easeInOut",
+              }}
+              style={{
+                fontFamily: "'DM Mono', monospace",
+                fontSize: "10px",
+                color: "rgba(232,228,220,0.3)",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+              }}
+            >
+              Scroll to explore →
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </div>
-    </section>
+        </div>
+      </section>
+    </>
   );
 }
