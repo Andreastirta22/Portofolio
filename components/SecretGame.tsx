@@ -65,17 +65,6 @@ export default function SecretGame() {
 
   return (
     <>
-      {/* 🎮 TOGGLE BUTTON (debug / trigger) */}
-      return (
-      <>
-        {secretMode && (
-          <div className="fixed top-5 right-5 z-50 bg-black text-white px-4 py-2 rounded-full text-sm shadow-lg">
-            Score: {score}
-          </div>
-        )}
-      </>
-      );
-      {/* 📊 SCORE */}
       {secretMode && (
         <div className="fixed top-5 right-5 z-50 bg-black text-white px-4 py-2 rounded-full text-sm shadow-lg">
           Score: {score}

@@ -200,8 +200,8 @@ export default function About() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "6rem",
+            gridTemplateColumns: "1fr",
+            gap: "3rem",
             alignItems: "start",
           }}
         >
