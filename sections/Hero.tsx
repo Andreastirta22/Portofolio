@@ -186,7 +186,10 @@ export default function Hero({ onExplore }: { onExplore: () => void }) {
   const active = slides[current];
 
   return (
-    <div className="h-screen w-full p-4 md:p-6 bg-gradient-to-b from-[#e8e1d1] via-[#d6cebb] to-[#0a0a0a]">
+    <div
+      id="experience"
+      className="h-screen w-full p-4 md:p-6 bg-gradient-to-b from-[#e8e1d1] via-[#d6cebb] to-[#0a0a0a]"
+    >
       {/* ── CV MODAL ── */}
       <AnimatePresence>
         {showCVModal && (

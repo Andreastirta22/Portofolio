@@ -1,5 +1,6 @@
 "use client";
 
+import SkillsMatrix from "./about/SkillsMatrix";
 import {
   motion,
   useScroll,
@@ -111,7 +112,7 @@ export default function About() {
     target: sectionRef,
     offset: ["start end", "end start"],
   });
-
+  const [activeTab, setActiveTab] = useState("skills");
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
   const noiseOpacity = useTransform(
     scrollYProgress,
@@ -480,6 +481,11 @@ export default function About() {
                 style={{ display: "flex", gap: "0.75rem", marginTop: "2rem" }}
               >
                 <motion.button
+                  onClick={() => {
+                    document
+                      .getElementById("projects")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }}
                   whileHover={{
                     scale: 1.03,
                     boxShadow: "0 0 24px rgba(232,228,220,0.12)",
@@ -504,6 +510,9 @@ export default function About() {
                 </motion.button>
 
                 <motion.button
+                  onClick={() => {
+                    window.open("https://wa.me/6285817446805", "_blank");
+                  }}
                   whileHover={{
                     scale: 1.03,
                     borderColor: "rgba(232,228,220,0.5)",
@@ -546,17 +555,61 @@ export default function About() {
                   padding: "0 0 1.25rem",
                 }}
               >
-                <span
+                <div
                   style={{
-                    fontSize: "9px",
-                    letterSpacing: "0.25em",
-                    textTransform: "uppercase",
-                    color: "rgba(232,228,220,0.2)",
-                    fontFamily: "'DM Mono', monospace",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1.5rem",
+                    flexWrap: "wrap",
                   }}
                 >
-                  Skill Matrix
-                </span>
+                  {[
+                    { id: "core", label: "Core Stack" },
+                    { id: "skills", label: "Skills" },
+                    { id: "certificates", label: "Certificates" },
+                  ].map((tab) => {
+                    const isActive = activeTab === tab.id;
+
+                    return (
+                      <motion.button
+                        key={tab.id}
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => setActiveTab(tab.id as any)}
+                        style={{
+                          position: "relative",
+                          background: "transparent",
+                          border: "none",
+                          padding: 0,
+                          cursor: "pointer",
+                          color: isActive
+                            ? "rgba(232,228,220,0.92)"
+                            : "rgba(232,228,220,0.3)",
+                          fontSize: "9px",
+                          letterSpacing: "0.25em",
+                          textTransform: "uppercase",
+                          fontFamily: "'DM Mono', monospace",
+                          transition: "color 0.3s",
+                        }}
+                      >
+                        {tab.label}
+
+                        {isActive && (
+                          <motion.div
+                            layoutId="about-active-tab"
+                            style={{
+                              position: "absolute",
+                              left: 0,
+                              right: 0,
+                              bottom: "-0.5rem",
+                              height: "1px",
+                              background: "#E8E4DC",
+                            }}
+                          />
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </div>
                 <span
                   style={{
                     fontSize: "9px",
@@ -569,297 +622,246 @@ export default function About() {
                 </span>
               </motion.div>
 
-              {skillGroups.map((group, i) => {
-                const avg = getAverage(group.skills);
-                const isActive = activeCard === i;
-                const isHovered = hoveredCard === i;
-                const color = PALETTE[i % PALETTE.length];
+              {/* ───────────── TAB CONTENT ───────────── */}
 
-                return (
-                  <motion.div
-                    key={group.id}
-                    initial={{ opacity: 0, x: 40, filter: "blur(6px)" }}
-                    whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                    viewport={{ once: true }}
-                    transition={{
-                      delay: i * 0.09,
-                      duration: 0.65,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                    onClick={() => setActiveCard(isActive ? null : i)}
-                    onHoverStart={() => setHoveredCard(i)}
-                    onHoverEnd={() => setHoveredCard(null)}
-                    style={{ position: "relative", cursor: "pointer" }}
-                  >
-                    {/* Hover / active bg fill */}
-                    <AnimatePresence>
-                      {(isHovered || isActive) && (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                          style={{
-                            position: "absolute",
-                            inset: 0,
-                            background: isActive
-                              ? `linear-gradient(90deg, rgba(232,228,220,0.04) 0%, transparent 100%)`
-                              : "rgba(232,228,220,0.02)",
-                            pointerEvents: "none",
-                            zIndex: 0,
-                          }}
+              {activeTab === "skills" && (
+                <SkillsMatrix
+                  skillGroups={skillGroups}
+                  activeCard={activeCard}
+                  setActiveCard={setActiveCard}
+                  hoveredCard={hoveredCard}
+                  setHoveredCard={setHoveredCard}
+                  mounted={mounted}
+                  getAverage={getAverage}
+                  PALETTE={PALETTE}
+                  Counter={Counter}
+                />
+              )}
+
+              {activeTab === "core" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 py-10"
+                >
+                  {[
+                    {
+                      title: "Next.js",
+                      desc: "Scalable frontend architecture with premium modern performance.",
+                      icon: "▲",
+                    },
+                    {
+                      title: "React",
+                      desc: "Reusable interactive UI systems and immersive interfaces.",
+                      icon: "⚛",
+                    },
+                    {
+                      title: "TypeScript",
+                      desc: "Strongly typed development for maintainable applications.",
+                      icon: "</>",
+                    },
+                    {
+                      title: "Tailwind CSS",
+                      desc: "Utility-first styling for responsive premium experiences.",
+                      icon: "✦",
+                    },
+                    {
+                      title: "Framer Motion",
+                      desc: "Smooth animations and motion-driven user interactions.",
+                      icon: "◉",
+                    },
+                    {
+                      title: "GSAP",
+                      desc: "Cinematic transitions and advanced creative animations.",
+                      icon: "◆",
+                    },
+                  ].map((stack, index) => (
+                    <motion.div
+                      key={stack.title}
+                      initial={{ opacity: 0, y: 40 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.5,
+                        delay: index * 0.08,
+                      }}
+                      whileHover={{
+                        y: -8,
+                      }}
+                      className="group relative overflow-hidden rounded-[28px]
+        border border-[#2a2a2a]
+        bg-[#111111]
+        p-7
+        transition-all duration-500
+        hover:border-[#3d3d3d]
+        hover:bg-[#151515]"
+                    >
+                      {/* glow */}
+                      <div
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100
+          transition-opacity duration-500"
+                      >
+                        <div
+                          className="absolute top-0 left-1/2 h-40 w-40 -translate-x-1/2
+            rounded-full bg-white/5 blur-3xl"
                         />
-                      )}
-                    </AnimatePresence>
+                      </div>
 
-                    {/* Left accent bar (active only) */}
-                    <AnimatePresence>
-                      {isActive && (
-                        <motion.div
-                          initial={{ scaleY: 0 }}
-                          animate={{ scaleY: 1 }}
-                          exit={{ scaleY: 0 }}
-                          transition={{
-                            duration: 0.35,
-                            ease: [0.22, 1, 0.36, 1],
-                          }}
+                      {/* icon */}
+                      <div
+                        className="mb-8 flex h-14 w-14 items-center justify-center
+          rounded-2xl border border-white/10 bg-white/[0.03]
+          text-xl text-[#e8e4dc]"
+                      >
+                        {stack.icon}
+                      </div>
+
+                      {/* content */}
+                      <div className="space-y-4">
+                        <h3
+                          className="text-2xl font-medium tracking-tight text-[#e8e4dc]"
                           style={{
-                            position: "absolute",
-                            left: 0,
-                            top: 0,
-                            bottom: 0,
-                            width: "1px",
-                            background: color.accent,
-                            transformOrigin: "top",
-                            zIndex: 1,
+                            fontFamily: "'Instrument Serif', serif",
                           }}
-                        />
-                      )}
-                    </AnimatePresence>
+                        >
+                          {stack.title}
+                        </h3>
 
-                    <div
+                        <p
+                          className="text-sm leading-relaxed text-[#86868b]"
+                          style={{
+                            fontFamily: "'DM Mono', monospace",
+                          }}
+                        >
+                          {stack.desc}
+                        </p>
+                      </div>
+
+                      {/* bottom line */}
+                      <div
+                        className="mt-10 h-px w-full
+          bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+
+              {activeTab === "certificates" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.45 }}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                    gap: "1rem",
+                    paddingTop: "0.5rem",
+                  }}
+                >
+                  {[
+                    {
+                      title: "PCAP Programming Essentials",
+                      issuer: "Python Institute",
+                      year: "2026",
+                      file: "/certificates/pcap-programming-essentials.pdf",
+                    },
+                    {
+                      title: "Sertifikat Kompetensi",
+                      issuer: "BNSP",
+                      year: "2026",
+                      file: "/certificates/sertifikat-kompetensi.pdf",
+                    },
+                  ].map((cert, i) => (
+                    <motion.div
+                      key={cert.title}
+                      whileHover={{ y: -4 }}
+                      initial={{ opacity: 0, y: 18 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.06 }}
                       style={{
+                        border: "1px solid rgba(232,228,220,0.08)",
+                        background: "rgba(255,255,255,0.015)",
+                        overflow: "hidden",
                         position: "relative",
-                        zIndex: 2,
-                        padding: "1.4rem 1.4rem 1.4rem 1.6rem",
-                        borderTop: "1px solid rgba(232,228,220,0.07)",
-                        borderBottom: isActive
-                          ? "1px solid rgba(232,228,220,0.1)"
-                          : "1px solid transparent",
-                        transition: "border-color 0.3s",
                       }}
                     >
-                      {/* Card Header */}
+                      {/* PDF Preview */}
                       <div
                         style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          marginBottom: "1.1rem",
-                          paddingRight: "1.5rem",
-                        }}
-                      >
-                        <div>
-                          <p
-                            style={{
-                              margin: "0 0 0.3rem",
-                              fontSize: "clamp(0.85rem, 2.5vw, 0.95rem)",
-                              fontWeight: 500,
-                              fontFamily: "'DM Serif Display', Georgia, serif",
-                              color: isActive
-                                ? color.accent
-                                : "rgba(232,228,220,0.75)",
-                              transition: "color 0.35s",
-                              letterSpacing: "0.01em",
-                            }}
-                          >
-                            {group.title}
-                          </p>
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: "10px",
-                              color: "rgba(232,228,220,0.2)",
-                              fontFamily: "'DM Mono', monospace",
-                              letterSpacing: "0.1em",
-                            }}
-                          >
-                            {group.skills?.length} technologies
-                          </p>
-                        </div>
-
-                        <div style={{ textAlign: "right", flexShrink: 0 }}>
-                          {mounted && (
-                            <Counter
-                              value={avg}
-                              color={
-                                isActive
-                                  ? color.accent
-                                  : "rgba(232,228,220,0.3)"
-                              }
-                            />
-                          )}
-                          <span
-                            style={{
-                              fontSize: "9px",
-                              color: "rgba(232,228,220,0.18)",
-                              fontFamily: "'DM Mono', monospace",
-                            }}
-                          >
-                            avg %
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Progress bar */}
-                      <div
-                        style={{
-                          height: "1px",
-                          background: "rgba(232,228,220,0.07)",
-                          borderRadius: 1,
+                          height: "180px",
+                          borderBottom: "1px solid rgba(232,228,220,0.08)",
                           overflow: "hidden",
+                          background: "#111",
                         }}
                       >
-                        <motion.div
-                          initial={{ scaleX: 0 }}
-                          whileInView={{ scaleX: 1 }}
-                          viewport={{ once: true }}
-                          transition={{
-                            delay: 0.25 + i * 0.08,
-                            duration: 1.1,
-                            ease: [0.22, 1, 0.36, 1],
-                          }}
+                        <iframe
+                          src={cert.file}
                           style={{
+                            width: "100%",
                             height: "100%",
-                            width: `${avg}%`,
-                            background: `linear-gradient(90deg, transparent 0%, ${color.accent} 100%)`,
-                            transformOrigin: "left",
+                            border: "none",
+                            opacity: 0.8,
                           }}
                         />
                       </div>
 
-                      {/* Expanded skill list */}
-                      <AnimatePresence>
-                        {isActive && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{
-                              duration: 0.45,
-                              ease: [0.22, 1, 0.36, 1],
-                            }}
-                            style={{ overflow: "hidden" }}
-                          >
-                            <div
-                              style={{
-                                paddingTop: "1.6rem",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "1rem",
-                              }}
-                            >
-                              {group.skills.map((skill: any, idx: number) => (
-                                <motion.div
-                                  key={idx}
-                                  initial={{ opacity: 0, x: -12 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{
-                                    delay: idx * 0.055,
-                                    duration: 0.4,
-                                  }}
-                                >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      justifyContent: "space-between",
-                                      marginBottom: "0.45rem",
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        fontSize: "11px",
-                                        color: "rgba(232,228,220,0.4)",
-                                        fontFamily: "'DM Mono', monospace",
-                                        letterSpacing: "0.08em",
-                                        textTransform: "uppercase",
-                                      }}
-                                    >
-                                      {skill.name}
-                                    </span>
-                                    <span
-                                      style={{
-                                        fontSize: "11px",
-                                        color: color.accent,
-                                        fontFamily: "'DM Mono', monospace",
-                                      }}
-                                    >
-                                      {skill.value}%
-                                    </span>
-                                  </div>
-                                  <div
-                                    style={{
-                                      height: "1px",
-                                      background: "rgba(232,228,220,0.05)",
-                                      overflow: "hidden",
-                                    }}
-                                  >
-                                    <motion.div
-                                      initial={{ scaleX: 0 }}
-                                      animate={{ scaleX: 1 }}
-                                      transition={{
-                                        delay: 0.08 + idx * 0.045,
-                                        duration: 0.8,
-                                        ease: [0.22, 1, 0.36, 1],
-                                      }}
-                                      style={{
-                                        height: "100%",
-                                        width: `${skill.value}%`,
-                                        background: `linear-gradient(90deg, rgba(232,228,220,0.2) 0%, ${color.accent} 100%)`,
-                                        transformOrigin: "left",
-                                      }}
-                                    />
-                                  </div>
-                                </motion.div>
-                              ))}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                      {/* Content */}
+                      <div style={{ padding: "1.3rem" }}>
+                        <p
+                          style={{
+                            margin: 0,
+                            color: "rgba(232,228,220,0.9)",
+                            fontFamily: "'DM Serif Display', Georgia, serif",
+                            fontSize: "1rem",
+                          }}
+                        >
+                          {cert.title}
+                        </p>
 
-                      {/* Toggle + indicator */}
-                      <motion.div
-                        animate={{ rotate: isActive ? 45 : 0 }}
-                        transition={{
-                          duration: 0.35,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                        style={{
-                          position: "absolute",
-                          top: "1.4rem",
-                          right: "1.1rem",
-                          width: 16,
-                          height: 16,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: isActive
-                            ? color.accent
-                            : "rgba(232,228,220,0.2)",
-                          fontSize: "18px",
-                          lineHeight: 1,
-                          transition: "color 0.3s",
-                          fontWeight: 300,
-                        }}
-                      >
-                        +
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                        <p
+                          style={{
+                            marginTop: "0.7rem",
+                            marginBottom: "1.3rem",
+                            color: "rgba(232,228,220,0.28)",
+                            fontSize: "10px",
+                            letterSpacing: "0.1em",
+                            textTransform: "uppercase",
+                            fontFamily: "'DM Mono', monospace",
+                          }}
+                        >
+                          {cert.issuer} • {cert.year}
+                        </p>
 
-              {/* Bottom rule */}
+                        <a
+                          href={cert.file}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            width: "100%",
+                            padding: "0.85rem",
+                            background: "transparent",
+                            border: "1px solid rgba(232,228,220,0.1)",
+                            color: "rgba(232,228,220,0.65)",
+                            fontSize: "10px",
+                            letterSpacing: "0.15em",
+                            textTransform: "uppercase",
+                            fontFamily: "'DM Mono', monospace",
+                            cursor: "pointer",
+                            textDecoration: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transition: "all 0.3s ease",
+                          }}
+                        >
+                          View Certificate
+                        </a>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
               <motion.div
                 initial={{ scaleX: 0 }}
                 whileInView={{ scaleX: 1 }}

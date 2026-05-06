@@ -11,7 +11,7 @@ import { useRef } from "react";
 import Word from "./Word";
 
 const text =
-  "Hi, I'm Andre, a developer with experience in system development and various projects, focused on building efficient solutions while crafting meaningful digital experiences.";
+  "I build immersive digital experiences through motion, clean architecture, and carefully crafted user interactions.";
 
 export default function IntroTransition() {
   const ref = useRef<HTMLElement>(null);

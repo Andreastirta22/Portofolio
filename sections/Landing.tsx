@@ -248,17 +248,28 @@ export default function Landing() {
             transition={{ delay: 1.6, duration: 0.7 }}
             className="mt-10 flex items-center gap-6"
           >
-            <button className="group relative overflow-hidden rounded-full border border-white/20 px-7 py-3 text-xs tracking-[0.2em] uppercase text-white transition-all hover:border-white/60">
-              <span className="relative z-10">View Work</span>
+            <button
+              onClick={() => {
+                document
+                  .getElementById("experience")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="group relative overflow-hidden rounded-full border border-white/20 px-7 py-3 text-xs tracking-[0.2em] uppercase text-white transition-all hover:border-white/60"
+            >
+              <span className="relative z-10">View Experience</span>
+
               <span className="absolute inset-0 translate-y-full bg-white transition-transform duration-300 ease-out group-hover:translate-y-0" />
+
               <span className="absolute inset-0 translate-y-full text-black flex items-center justify-center text-xs tracking-[0.2em] uppercase transition-transform duration-300 ease-out group-hover:translate-y-0">
-                View Work
+                View Experience
               </span>
             </button>
 
             <motion.a
               whileHover={{ x: 4 }}
-              href="#"
+              href="https://wa.me/6285817446805"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-white/40 hover:text-white transition-colors"
             >
               <span>Contact</span>

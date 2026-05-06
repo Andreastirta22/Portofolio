@@ -68,18 +68,38 @@ export default function FlipCard() {
 
               {/* SOCIAL */}
               <div className="absolute top-3 right-3 flex gap-2 z-10">
-                {[FaGithub, FaLinkedin, FaInstagram].map((Icon, i) => (
-                  <motion.a
-                    key={i}
-                    whileHover={{ scale: 1.2, y: -3 }}
-                    href="#"
-                    className="w-9 h-9 flex items-center justify-center rounded-full 
-                    bg-white/40 backdrop-blur-md border border-black/10 
-                    text-black/70"
-                  >
-                    <Icon />
-                  </motion.a>
-                ))}
+                {[
+                  {
+                    icon: FaGithub,
+                    href: "https://github.com/Andreastirta22",
+                  },
+                  {
+                    icon: FaLinkedin,
+                    href: "https://linkedin.com/in/USERNAME",
+                  },
+                  {
+                    icon: FaInstagram,
+                    href: "https://instagram.com/andre22tirta",
+                  },
+                ].map((item, i) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <motion.a
+                      key={i}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      whileHover={{ scale: 1.2, y: -3 }}
+                      className="w-9 h-9 flex items-center justify-center rounded-full 
+      bg-white/40 backdrop-blur-md border border-black/10 
+      text-black/70 relative z-20"
+                    >
+                      <Icon />
+                    </motion.a>
+                  );
+                })}
               </div>
             </div>
 
