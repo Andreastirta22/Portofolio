@@ -11,7 +11,7 @@ const SPLASH_IMAGES = [
   "/splash/splash-warm.png",
 ];
 
-const HOLD_DURATION = 700;
+const HOLD_DURATION = 1400;
 
 // ✅ kasih type Variants biar TS diem
 const imageVariants: Variants = {
@@ -53,7 +53,6 @@ export default function IntroSplash({ onFinish }: IntroSplashProps) {
 
   const hasFinishedRef = useRef(false);
 
-  // ✅ preload aman (ga bentrok lagi)
   useEffect(() => {
     SPLASH_IMAGES.forEach((src) => {
       const img = new window.Image();
