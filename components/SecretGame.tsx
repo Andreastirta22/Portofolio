@@ -7,7 +7,7 @@ export default function SecretGame() {
   const [secretMode, setSecretMode] = useState(false);
   const [score, setScore] = useState(0);
 
-  // 🔥 HANDLE CLICK
+  // HANDLE CLICK
   const handleClick = (e: MouseEvent) => {
     if (!secretMode) return;
 

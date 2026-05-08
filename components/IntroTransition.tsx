@@ -38,7 +38,7 @@ export default function IntroTransition() {
   const exitBlur = useTransform(smoothProgress, [0.65, 0.9], [0, 6]);
   const blurFilter = useMotionTemplate`blur(${exitBlur}px)`;
 
-  // ── WRAP EXIT (MAIN EFFECT 🔥)
+  // ── WRAP EXIT (MAIN EFFECT)
   const wrapY = useTransform(smoothProgress, [0.75, 1], ["0%", "-40%"]);
   const wrapScale = useTransform(smoothProgress, [0.75, 1], [1, 0.92]);
   const wrapOpacity = useTransform(smoothProgress, [0.8, 1], [1, 0]);

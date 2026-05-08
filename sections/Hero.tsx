@@ -671,13 +671,13 @@ export default function Hero({ onExplore }: { onExplore: () => void }) {
           {/* base gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#080808] to-[#050505]" />
 
-          {/* subtle warm glow (biar nyatu sama image lu) */}
+          {/* subtle warm glow */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(200,169,110,0.15),transparent_40%)]" />
 
           {/* cool tone balance */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(126,184,201,0.12),transparent_45%)]" />
 
-          {/* vignette biar cinematic */}
+          {/* vignette */}
           <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_60%,rgba(0,0,0,0.6))]" />
         </div>
       </motion.section>

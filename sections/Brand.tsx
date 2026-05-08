@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 export default function BrandSection() {
   return (
     <section className="relative min-h-screen bg-[#0b0b0f] flex items-center overflow-hidden px-6 md:px-20">
-      {/* 🔥 Background Glow */}
+      {/* Background Glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-[#e6d3b3]/10 blur-[120px] -translate-x-1/2 -translate-y-1/2" />
       </div>

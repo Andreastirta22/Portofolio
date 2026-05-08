@@ -8,7 +8,7 @@ export default function FlipCard() {
   const [flipped, setFlipped] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // 🔥 MOUSE 3D TILT
+  // MOUSE 3D TILT
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;
     if (!card) return;
@@ -39,7 +39,7 @@ export default function FlipCard() {
         onMouseMove={handleMouseMove}
         onMouseLeave={resetTilt}
       >
-        {/* 🔥 GLOW FOLLOW CURSOR */}
+        {/* GLOW FOLLOW CURSOR */}
         <div className="absolute inset-0 rounded-[32px] bg-gradient-to-br from-[#e6dcd2]/40 via-transparent to-[#d6ccc2]/30 blur-2xl opacity-70" />
 
         {/* CARD */}

@@ -24,7 +24,7 @@ export default function Gallery() {
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 py-20 sm:py-28 overflow-hidden bg-gradient-to-b from-base-main via-base-soft to-base-deep">
-      {/* 🔥 TOP TRANSITION (BIAR GA JATUH) */}
+      {/* TOP TRANSITION */}
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-base-main to-transparent z-10" />
 
       {/* BACKGROUND EFFECT */}
@@ -67,7 +67,7 @@ export default function Gallery() {
               className="w-full h-[280px] sm:h-[320px] md:h-[360px] object-cover rounded-2xl grayscale brightness-90 contrast-105 group-hover:grayscale-0 transition duration-500 shadow-lg group-hover:shadow-2xl"
             />
 
-            {/* DARK OVERLAY (BIAR CINEMATIC) */}
+            {/* DARK OVERLAY */}
             <div className="absolute inset-0 bg-black/30 rounded-2xl pointer-events-none" />
           </motion.div>
         ))}

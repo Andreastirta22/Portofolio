@@ -56,7 +56,7 @@ export default function CubeBlock({
           }}
         />
 
-        {/* SHADOW (biar ngangkat) */}
+        {/* SHADOW */}
         <div className="absolute left-2 top-[110%] w-full h-[20px] bg-black/30 blur-md" />
       </div>
     </div>

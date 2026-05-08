@@ -593,7 +593,7 @@ export default function Projects() {
                   "Mobile Dev",
                 ].map((t, i) => (
                   <span
-                    key={`${t}-${i}-${loopIndex}`} // 🔥 FIX DISINI
+                    key={`${t}-${i}-${loopIndex}`} 
                     style={{ padding: "0 28px", whiteSpace: "nowrap" }}
                   >
                     {t}

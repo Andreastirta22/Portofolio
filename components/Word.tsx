@@ -17,8 +17,8 @@ export default function Word({
   const range = spread / total;
 
   const start = index * range;
-  const mid = start + range * 0.6; // 🔥 lebih panjang dikit biar kebaca
-  const end = start + range * 1.2; // kasih overlap dikit
+  const mid = start + range * 0.6;
+  const end = start + range * 1.2;
   const opacity = useTransform(progress, [start, mid], [0.1, 1]);
 
   // blur → sharp

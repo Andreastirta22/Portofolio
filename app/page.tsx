@@ -17,7 +17,6 @@ import IntroTransition from "@/components/IntroTransition";
 export default function Home() {
   const [ready, setReady] = useState(false);
 
-  // 🔥 INIT STATE TANPA EFFECT SETSTATE
   const [showSplash, setShowSplash] = useState(() => {
     if (typeof window === "undefined") return false;
 
@@ -27,7 +26,6 @@ export default function Home() {
 
   const [openTimeline, setOpenTimeline] = useState(false);
 
-  // 🔥 SET READY + STORAGE (NO SETSHOWSPLASH DI SINI)
   useEffect(() => {
     setReady(true);
 
@@ -36,14 +34,12 @@ export default function Home() {
     }
   }, [showSplash]);
 
-  // 🔥 SCROLL RESET
   useEffect(() => {
     if (!showSplash && !window.location.hash) {
       window.scrollTo(0, 0);
     }
   }, [showSplash]);
 
-  // 🔥 PREVENT HYDRATION MISMATCH
   if (!ready) return null;
 
   return (
@@ -53,7 +49,7 @@ export default function Home() {
       ) : (
         <div className="relative z-0">
           <Navbar />
-          <Landing />
+          <Landing />s
           <IntroTransition />
           <About />
           <Hero onExplore={() => setOpenTimeline(true)} />
@@ -61,7 +57,6 @@ export default function Home() {
           <Projects />
           <Gallery />
           <Footer />
-
           {openTimeline && <Timeline onClose={() => setOpenTimeline(false)} />}
         </div>
       )}
