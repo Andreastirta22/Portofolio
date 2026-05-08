@@ -75,7 +75,7 @@ export default function FlipCard() {
                   },
                   {
                     icon: FaLinkedin,
-                    href: "https://www.linkedin.com/in/andreas-tirta-098865265/",
+                    href: "https://www.linkedin.com/in/andreastirta22/",
                   },
                   {
                     icon: FaInstagram,
