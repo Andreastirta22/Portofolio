@@ -13,7 +13,6 @@ const SPLASH_IMAGES = [
 
 const HOLD_DURATION = 1400;
 
-// ✅ kasih type Variants biar TS diem
 const imageVariants: Variants = {
   enter: {
     opacity: 0,
