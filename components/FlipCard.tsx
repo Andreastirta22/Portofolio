@@ -131,7 +131,7 @@ export default function FlipCard() {
           {/* BACK */}
           <div className="absolute w-full h-full backface-hidden rotate-y-180 rounded-[32px] border border-black/5 bg-white/50 backdrop-blur-xl flex flex-col items-center justify-center gap-5 p-6">
             <motion.img
-              src="/qr.png"
+              src="/qr.jpg"
               alt="QR"
               className="w-[190px] h-[190px] bg-white p-4 rounded-2xl shadow-lg"
               animate={{ scale: [1, 1.07, 1] }}
