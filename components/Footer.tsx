@@ -12,12 +12,32 @@ export default function Footer() {
       {/* GRADIENT */}
       <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-black/10 to-transparent pointer-events-none" />
 
-      {/* 🔥 TEXT ATAS */}
+      {/*  TEXT ATAS */}
       <div className="relative z-10 flex flex-col items-center pt-10 gap-4">
         <div className="flex gap-6 text-sm text-black/60">
-          <a href="#">Github</a>
-          <a href="#">LinkedIn</a>
-          <a href="#">Instagram</a>
+          <a
+            href="https://github.com/Andreastirta22"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Github
+          </a>
+
+          <a
+            href="https://www.linkedin.com/in/andreas-tirta-098865265/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            LinkedIn
+          </a>
+
+          <a
+            href="https://instagram.com/andre22tirta"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Instagram
+          </a>
         </div>
 
         <p className="text-xs text-black/40">© 2026 Andre</p>
@@ -27,7 +47,7 @@ export default function Footer() {
         </p>
       </div>
 
-      {/* 🔥 SEKIAN IMAGE */}
+      {/*  SEKIAN IMAGE */}
       <div className="absolute bottom-[2px] md:bottom-[20px] left-[40px] md:left-[200px] z-10">
         <Image
           src="/sekian.png"
@@ -38,7 +58,7 @@ export default function Footer() {
         />
       </div>
 
-      {/* 🔥 ANDRE */}
+      {/*  ANDRE */}
       <FallingLetters />
     </footer>
   );
