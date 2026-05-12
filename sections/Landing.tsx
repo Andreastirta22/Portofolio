@@ -119,17 +119,18 @@ const MARQUEE_ITEMS = [
 
 function Marquee() {
   const doubled = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+
   return (
     <div className="absolute bottom-0 left-0 right-0 overflow-hidden border-t border-white/10 bg-black/30 backdrop-blur-sm py-3">
       <motion.div
         animate={{ x: ["0%", "-50%"] }}
         transition={{ duration: 18, ease: "linear", repeat: Infinity }}
-        className="flex whitespace-nowrap gap-6 w-max"
+        className="flex whitespace-nowrap gap-10 w-max"
       >
         {doubled.map((item, i) => (
           <span
             key={i}
-            className="text-[10px] tracking-[0.25em] text-white/30 uppercase"
+            className="flex-shrink-0 text-[10px] tracking-[0.25em] text-white/30 uppercase"
           >
             {item}
           </span>

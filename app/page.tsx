@@ -49,7 +49,7 @@ export default function Home() {
       ) : (
         <div className="relative z-0">
           <Navbar />
-          <Landing />s
+          <Landing />
           <IntroTransition />
           <About />
           <Hero onExplore={() => setOpenTimeline(true)} />
