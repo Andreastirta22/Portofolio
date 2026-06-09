@@ -226,8 +226,14 @@ export default function Hero({ onExplore }: { onExplore: () => void }) {
               </p>
               <div className="flex flex-col gap-3">
                 {[
-                  { label: "🇮🇩  Bahasa Indonesia", href: "/cv-id.pdf" },
-                  { label: "🇺🇸  English", href: "/cv-en.pdf" },
+                  {
+                    label: "🇮🇩  Bahasa Indonesia",
+                    href: "/cv/Andreas_Tirta_Sanjaya_CV_ID.pdf",
+                  },
+                  {
+                    label: "🇺🇸  English",
+                    href: "/cv/Andreas_Tirta_Sanjaya_CV_EN.pdf",
+                  },
                 ].map(({ label, href }) => (
                   <a
                     key={href}

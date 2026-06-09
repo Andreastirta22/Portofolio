@@ -772,6 +772,12 @@ export default function About() {
                       year: "2026",
                       file: "/certificates/sertifikat-kompetensi.pdf",
                     },
+                    {
+                      title: "Sertifikat TOEFL",
+                      issuer: "Universitas Bina Sarana Informatika",
+                      year: "2026",
+                      file: "/certificates/sertifikat-toefl.pdf",
+                    },
                   ].map((cert, i) => (
                     <motion.div
                       key={cert.title}
